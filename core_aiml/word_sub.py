@@ -57,41 +57,22 @@ class WordSub(dict):
 
     def __call__(self, match):
         """Handler invoked for each regex match."""
-        return self[match.group(0)]
+        ret = self[match.group(0)]
+        return ret
 
     def __setitem__(self, i, y):
         self._regexIsDirty = True
         # for each entry the user adds, we actually add three entries:
         super(type(self), self).__setitem__(i.lower(), y.lower())  # key = value
         super(type(self), self).__setitem__(string.capwords(i), string.capwords(y))  # Key = Value
-        super(type(self), self).__setitem__(i.upper(), y.upper())  # KEY = VALUE
+
+        # When changing the person, "I" should never translate to an all caps words in the other person
+        if i != "I":
+            super(type(self), self).__setitem__(i.upper(), y.upper())  # KEY = VALUE
 
     def sub(self, text):
         """Translate text, returns the modified text."""
         if self._regexIsDirty:
             self._update_regex()
-        return self._regex.sub(self, text)
-
-# self-test
-if __name__ == "__main__":
-    subber = WordSub()
-    subber["apple"] = "banana"
-    subber["orange"] = "pear"
-    subber["banana"] = "apple"
-    subber["he"] = "she"
-    subber["I'd"] = "I would"
-
-    # test case insensitivity
-    inStr = "I'd like one apple, one Orange and one BANANA."
-    outStr = "I Would like one banana, one Pear and one APPLE."
-    if subber.sub(inStr) == outStr:
-        print("Test #1 PASSED")
-    else:
-        print("Test #1 FAILED: '{0}'".format(subber.sub(inStr)))
-
-    inStr = "He said he'd like to go with me"
-    outStr = "She said she'd like to go with me"
-    if subber.sub(inStr) == outStr:
-        print("Test #2 PASSED")
-    else:
-        print("Test #2 FAILED: '{0}'".format(subber.sub(inStr)))
+        resp = self._regex.sub(self, text)
+        return resp
