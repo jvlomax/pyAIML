@@ -57,8 +57,7 @@ class WordSub(dict):
 
     def __call__(self, match):
         """Handler invoked for each regex match."""
-        ret = self[match.group(0)]
-        return ret
+        return self[match.group(0)]
 
     def __setitem__(self, i, y):
         self._regexIsDirty = True
@@ -74,5 +73,4 @@ class WordSub(dict):
         """Translate text, returns the modified text."""
         if self._regexIsDirty:
             self._update_regex()
-        resp = self._regex.sub(self, text)
-        return resp
+        return self._regex.sub(self, text)
